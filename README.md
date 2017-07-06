@@ -1,1 +1,1 @@
-# JIRAScripting
+# JIRA Scripts
