@@ -15,7 +15,7 @@ def componentManager = ComponentManager.getInstance()
 def issue = componentManager.getIssueManager().getIssueObject("HARVEST-4806")
 
 def WufooUser = userManager.getUser('Wufoo').getName()
-def NewUser = userManager.getUser('pdwyer')
+def NewUser = userManager.getUser('jroethel')
 
 def reporter = issue.getReporter().getName()
 
