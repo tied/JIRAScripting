@@ -17,17 +17,19 @@ userManager = ComponentAccessor.getUserManager()
 
 
 def issueType = issue.getIssueType().name // Get the type
-def QAUser = userManager.getUser('Quality_Assurance_Te') // Get the QA Team user
+def Tier3 = userManager.getUser('Tier_III') // Get the QA Team user
 def TechSupport = userManager.getUser('Tech_Support_Team_Le')
-def isFeatureRequest
+def isFeatureRequest = false
+def issueUser = issue.getAssignee() // Get the assignee (should be empty)
 
 if(issueType=='Feature Request'){
     isFeatureRequest=true
 }
 
-
-if(isFeatureRequest){
-    issue.setAssignee(QAUser)
-} else {
-    issue.setAssignee(TechSupport)
+if(issueUser == null) {
+    if (isFeatureRequest) {
+        issue.setAssignee(TechSupport)
+    } else {
+        issue.setAssignee(Tier3)
+    }
 }
