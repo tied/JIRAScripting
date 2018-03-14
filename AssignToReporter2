@@ -31,10 +31,11 @@ def componentManager = ComponentManager.getInstance()
 def userManager = ComponentAccessor.getUserManager()
 
 // For testing
-//def issue = componentManager.getIssueManager().getIssueObject("HARVEST-4752")
+//def issueManager = ComponentAccessor.getIssueManager()
+//def issue = issueManager.getIssueObject("HARVEST-9081")
 
 def userUtil = ComponentAccessor.getUserUtil()
-def com.atlassian.crowd.embedded.api.User currentUser =   ComponentManager.instance.jiraAuthenticationContext.getLoggedInUser()
+def currentUser =   ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser()
 def currentProject = issue.getProjectObject().getName() // Get the Project
 def isDevelopment = userUtil.getGroupNamesForUser(currentUser.name).contains("JG_Development") // Check to see if the user is in development
 def isTesting = userUtil.getGroupNamesForUser(currentUser.name).contains("JG_Testing") // Check to see if the user is in testing
@@ -45,56 +46,58 @@ def isDoc = userUtil.getGroupNamesForUser(currentUser.name).contains("JG_Documen
 def reporterUser = issue.getReporterUser() // Get the reporter
 def issueUser = issue.getAssignee() // Get the assignee (should be empty)
 def issueType = issue.getIssueType().name // Get the type
-def QAUser = userManager.getUser('Quality_Assurance_Te') // Get the QA Team user
+def QAUser = userManager.getUserByName('Quality_Assurance_Te') // Get the QA Team user
 def Fixer
 def isFeatureRequest
 def CurrentProject = issue.getProjectObject().getName() // Get the Project
 def isHarvest = false
 def isCopia = false
 
-def CopiaQAFixer = userManager.getUser("dwacker") // QA Copia Fixer
-def HarvestQAFixer = userManager.getUser("tspurling") // Harvest Fixer
+def CopiaQAFixer = userManager.getUserByName("dwacker") // QA Copia Fixer
+def HarvestQAFixer = userManager.getUserByName("tspurling") // Harvest Fixer
 
 if(CurrentProject == 'Harvest LIS') {
-    Fixer = userManager.getUser('tspurling')
+    Fixer = userManager.getUserByName('tspurling')
     isHarvest = true
 } else if(CurrentProject == 'Copia') {
-    Fixer = userManager.getUser('ecrawford')
+    Fixer = userManager.getUserByName('ecrawford')
     isCopia=true
 } else if(CurrentProject == 'Interface Engine') {
-    Fixer = userManager.getUser('jphillips')
+    Fixer = userManager.getUserByName('jphillips')
 } else if(CurrentProject == 'Labeler') {
-    Fixer = userManager.getUser('wford')
+    Fixer = userManager.getUserByName('wford')
 } else if(CurrentProject == 'License Generator') {
-    Fixer = userManager.getUser('tspurling')
+    Fixer = userManager.getUserByName('tspurling')
 } else if(CurrentProject == 'Orchard Collect') {
-    Fixer = userManager.getUser('dwaddell')
+    Fixer = userManager.getUserByName('dwaddell')
 } else if(CurrentProject == 'Orchard Device Engine') {
-    Fixer = userManager.getUser('dhardwick')
+    Fixer = userManager.getUserByName('dhardwick')
 } else if(CurrentProject == 'Win32API') {
-    Fixer = userManager.getUser('ihaas')
+    Fixer = userManager.getUserByName('ihaas')
 } else if(CurrentProject == 'Mapper'){
-    Fixer = userManager.getUser('ljackson')
+    Fixer = userManager.getUserByName('ljackson')
 } else if(CurrentProject == 'Orchard TWAIN'){
-    Fixer = userManager.getUser('wford')
+    Fixer = userManager.getUserByName('wford')
 } else if (CurrentProject == 'Product Security'){
-    Fixer = userManager.getUser('jmeek')
+    Fixer = userManager.getUserByName('jmeek')
 }
 
 if(issueType=='Feature Request') {
     isFeatureRequest = true
+} else {
+    isFeatureRequest = false
 }
 
 if(issueType == 'UI Change') {
     if (isHarvest){
-        Fixer = userManager.getUser('cwayne')
+        Fixer = userManager.getUserByName('cwayne')
 
     } else if (isCopia){
-        Fixer = userManager.getUser('jmeek')
+        Fixer = userManager.getUserByName('jmeek')
     }
 } else if (issueType == 'OT Error'){
     if (isHarvest){
-        Fixer = userManager.getUser('Development_Team')
+        Fixer = userManager.getUserByName('Development_Team')
     }
 }
 
@@ -116,5 +119,5 @@ if (canContinue) {
             issue.setAssignee(reporterUser)
         }
     }
-    componentManager.getIssueManager().updateIssue(currentUser,issue,EventDispatchOption.ISSUE_UPDATED,false)
+    ComponentAccessor.getIssueManager().updateIssue(currentUser,issue,EventDispatchOption.ISSUE_UPDATED,false)
 }

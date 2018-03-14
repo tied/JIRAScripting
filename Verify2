@@ -1,0 +1,59 @@
+/**
+ * Created by PRD on 9/14/2016
+ * This script will fill in the assignment field for every product verification
+ * Currently the assignments are the following:
+ * Harvest = Jeanne Merry
+ * Copia = Bodie Shallenberger
+ * Interface Engine = Jenni Studt
+ * Product Security = Josh Meek
+ * Labeler = Katherine Wertz
+ * License Generator = Katherine Wertz
+ * Orchard Collect = Bodie Shallenberger
+ * ODE = Karen Hockins
+ * Win32API = Jenni Studt
+ * TWAIN = Jenni Studt
+ * Mapper = Jenni Studt
+ */
+
+
+import com.atlassian.jira.component.ComponentAccessor
+import com.atlassian.jira.ComponentManager
+import com.atlassian.jira.event.type.EventDispatchOption
+
+def userManager = ComponentAccessor.getUserManager()
+
+def currentUser =   ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser()
+
+// For testing
+def issueManager = ComponentAccessor.getIssueManager()
+def issue = issueManager.getIssueObject("HARVEST-9081")
+
+def HarvestVerified = userManager.getUserByName('jmerry') // Harvest
+def SequoiaVerified = userManager.getUserByName('khockins') // ODE/Trellis Enterprise/Sequoia
+def CopiaVerified = userManager.getUserByName('bshallenberger') // Copia
+def OtherVerified = userManager.getUserByName('kwertz') // Labeler/License Generator/Win32API
+def PSVerified = userManager.getUserByName('jmeek') // Product Security
+def TrellisVerified =  userManager.getUserByName('mstanage') // Trellis
+def MapperVerified = userManager.getUserByName('jstudt') // Mapper
+def CurrentProject = issue.getProjectObject().getName() // Get the Project
+
+def containsLabel = "FSR" in issue.getLabels()*.label // If the label contains FSR then it will need to go to Zac first
+
+// Depending on the project set the assignee; this can be added to and changed if need be
+if (CurrentProject == 'Product Security' || CurrentProject == 'Win32API' | containsLabel) { // Goes to Josh if it has an FSR label or is PS/Win32API
+    issue.setAssignee(PSVerified)
+} else if (CurrentProject == 'Harvest LIS') {
+    issue.setAssignee(HarvestVerified)
+} else if (CurrentProject == 'Copia' || CurrentProject == 'Orchard Collect') {
+    issue.setAssignee(CopiaVerified)
+} else if (CurrentProject == 'Orchard Device Engine') {
+    issue.setAssignee(SequoiaVerified)
+} else if (CurrentProject == 'Trellis' || CurrentProject == 'Interface Engine' || CurrentProject == 'Orchard TWAIN') {
+    issue.setAssignee(MapperVerified)
+} else if (CurrentProject == 'Mapper'){
+    issue.setAssignee(MapperVerified)
+} else {
+    issue.setAssignee(OtherVerified)
+}
+
+ComponentAccessor.getIssueManager().updateIssue(currentUser,issue,EventDispatchOption.ISSUE_UPDATED,false)

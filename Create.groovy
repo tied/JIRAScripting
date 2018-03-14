@@ -12,13 +12,14 @@ import com.atlassian.jira.issue.IssueInputParameters
 import com.atlassian.jira.event.type.EventDispatchOption
 import com.atlassian.jira.bc.issue.IssueService.IssueResult
 
+// Currently not implemented anywhere
 
 
 // For testing
 def componentManager = ComponentManager.getInstance()
 //def issue = componentManager.getIssueManager().getIssueObject("HARVEST-4720")
 
-userManager = ComponentAccessor.getUserManager()
+def userManager = ComponentAccessor.getUserManager()
 def issueService = ComponentAccessor.getIssueService()
 def userUtil = ComponentAccessor.getUserUtil()
 

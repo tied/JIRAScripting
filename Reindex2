@@ -1,0 +1,17 @@
+/**
+ * Created by PRD on 10/28/2016
+ * Reindexes an issue
+ **/
+
+import com.atlassian.jira.component.ComponentAccessor
+import com.atlassian.jira.ComponentManager
+import com.atlassian.jira.event.type.EventDispatchOption
+import com.atlassian.jira.issue.index.IssueIndexingService
+import com.atlassian.jira.util.ImportUtils
+
+def currentUser =   ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser() // Get the user for the update issue command
+def issueIndexingService = ComponentAccessor.getComponent(IssueIndexingService)
+
+// Just reindex the issue and send the update
+issueIndexingService.reIndex(issue)
+ComponentAccessor.getIssueManager().updateIssue(currentUser,issue,EventDispatchOption.ISSUE_UPDATED,false)

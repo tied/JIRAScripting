@@ -1,0 +1,67 @@
+/**
+ * Created by PRD on 9/14/2016.
+ * Will be used for the Fix event for the following projects
+ * Harvest
+ * Copia
+ * Interface Engine
+ * Product Security
+ * Labeler
+ * License Generator
+ * Orchard Collect
+ * ODE
+ * Trellis
+ * Win32API
+ */
+
+// Please note that this may look incorrect in the console, but I assure you as of 7.8.0 it works correctly
+
+import com.atlassian.jira.component.ComponentAccessor
+import com.atlassian.jira.ComponentManager
+import com.atlassian.jira.event.type.EventDispatchOption
+
+
+def userManager = ComponentAccessor.getUserManager()
+
+// For testing
+//def issueManager = ComponentAccessor.getIssueManager()
+//def issue = issueManager.getIssueObject("HARVEST-9081")
+
+def userUtil = ComponentAccessor.getUserUtil()
+def currentUser =   ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser()
+def assignToUser = userManager.getUserByName('kyoung')
+def testerUser = userManager.getUserByName('Testing_Team')
+def ODEUser = userManager.getUserByName('ODE_Team')
+def PSUser = userManager.getUserByName('jmeek')
+def testedByUser
+def testedBy
+def CurrentProject = issue.getProjectObject().getName()
+def reporterUser = issue.getReporterUser() // Get the reporter
+def isTestingReporter = userUtil.getGroupNamesForUser(reporterUser.getName()).contains("JG_Testing") // Check to see if the user is in testing
+def customField = ComponentAccessor.getCustomFieldManager().getCustomFieldObjectByName("Tested By")
+
+if(issue.getCustomFieldValue(customField) != null) {
+    testedBy = customField.getValue(issue)
+    testedByUser = userManager.getUserByKey(testedBy.getKey())
+}
+else {
+    testedByUser = null
+}
+
+
+def containsLabel = "FSR" in issue.getLabels()*.label // If the label contains FSR then it will need to go to Zac first
+
+if (issue.components*.name.contains('Interface Engine') || CurrentProject == 'Interface Engine') {
+    //Check override for Interface Engine fixes.  If the component is Interface Engine, assign to Kevin Young.
+    issue.setAssignee(assignToUser)
+} else if (testedByUser != null) {
+    //If we're not dealing with an Interface Engine issue, then assign to the last tester who looked at this issue.
+    issue.setAssignee(testedByUser)
+} else if (CurrentProject == 'Product Security' || CurrentProject == 'Win32API' | containsLabel) {
+    issue.setAssignee(PSUser)
+} else if(isTestingReporter){ // If a tester reported this, send it back to that same tester
+    issue.setAssignee(reporterUser)
+} else { //Otherwise, assign to the Tester user.
+    issue.setAssignee(testerUser)
+}
+
+ComponentAccessor.getIssueManager().updateIssue(currentUser,issue,EventDispatchOption.ISSUE_UPDATED,false)
