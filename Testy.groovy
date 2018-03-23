@@ -48,3 +48,8 @@ changeItems.any {
 changeItems.any {
     (it.field == 'Fix Notes') && (it.oldstring != it.newstring) && (it.oldstring != null)
 }
+
+import com.atlassian.jira.component.ComponentAccessor
+
+def groupManager = ComponentAccessor.getGroupManager()
+groupManager.isUserInGroup(issue.reporter?.name, 'JG_Automation') && (issue.reporter?.name != 'Automation_Team') && (issue.issueTypeObject.name != 'Sub-Task')

@@ -21,7 +21,11 @@ def issueManager = ComponentAccessor.getIssueManager()
 def userManager = ComponentAccessor.getUserManager()
 
 // Debugging stuff
-def issue = issueManager.getIssueObject("HARVEST-9081")
+//def issue = issueManager.getIssueObject("ODE-1604")
+
+
+
+
 //(linkMgr.getOutwardLinks(issue.getId())*.issueLinkType.name.contains('Report Failure')) && (issue.status != originalIssue.status)
 
 // Define the constants
@@ -66,17 +70,18 @@ for (IssueLink link in linkMgr.getOutwardLinks(issue.id)) {
 
 def subject
 def body
-def count = 0
+int count
 
 // Loop through the email list
-for (String address in emails) {
-    subject ="The ticket " + issue.toString() + " has been marked as a failure of "+issues[count].toString() // Build the subject
-    body = "Failed ticket: https://jira.orchardsoft.com/browse/"+issues[count].toString()+"\n"
-    body = body+"Fail reported in:  https://jira.orchardsoft.com/browse/"+issue.toString()
-    sendEmail(address,subject,body) // Call the email
-    count++
+for (count=0; count<issues.size; count++) {
+    for (String address in emails) {
+        subject = "The ticket " + issue.toString() + " has been marked as a failure of " + issues[count].toString()
+        // Build the subject
+        body = "Failed ticket: https://jira.orchardsoft.com/browse/" + issues[count].toString() + "\n"
+        body = body + "Fail reported in:  https://jira.orchardsoft.com/browse/" + issue.toString()
+        sendEmail(address, subject, body) // Call the email
+    }
 }
-
 // Fuction to build the email and send it
 def sendEmail(String emailAddr, String subject, String body) {
     SMTPMailServer mailServer = ComponentAccessor.getMailServerManager().getDefaultSMTPMailServer()
@@ -88,5 +93,5 @@ def sendEmail(String emailAddr, String subject, String body) {
     }
 }
 
-ComponentAccessor.getIssueManager().updateIssue(currentUser,issue,EventDispatchOption.ISSUE_UPDATED,false)
+//ComponentAccessor.getIssueManager().updateIssue(currentUser,issue,EventDispatchOption.ISSUE_UPDATED,false)
 
