@@ -1,0 +1,35 @@
+/**
+ * Created by pdwyer on 10/5/2017.
+ * When a ticket is sent from a developer to Ops it needs to go to a certain assignee
+ * Feature Request = Tech_Support_Team_Leads_Teams
+ * Defect = Quality_assurance_team
+ */
+
+import com.atlassian.jira.component.ComponentAccessor
+import com.atlassian.jira.ComponentManager
+
+
+def componentManager = ComponentManager.getInstance()
+userManager = ComponentAccessor.getUserManager()
+
+// For testing
+//def issue = componentManager.getIssueManager().getIssueObject("HARVEST-4752")
+
+
+def issueType = issue.getIssueType().name // Get the type
+def Tier3 = userManager.getUser('Tier_III') // Get the QA Team user
+def TechSupport = userManager.getUser('Tech_Support_Team_Le')
+def isFeatureRequest = false
+def issueUser = issue.getAssignee() // Get the assignee (should be empty)
+
+if(issueType=='Feature Request'){
+    isFeatureRequest=true
+}
+
+if(issueUser == null) {
+    if (isFeatureRequest) {
+        issue.setAssignee(TechSupport)
+    } else {
+        issue.setAssignee(Tier3)
+    }
+}

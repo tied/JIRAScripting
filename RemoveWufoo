@@ -11,8 +11,8 @@ userManager = ComponentAccessor.getUserManager()
 optionManager = ComponentAccessor.getOptionsManager()
 
 // For testing
-def componentManager = ComponentManager.getInstance()
-def issue = componentManager.getIssueManager().getIssueObject("HARVEST-4806")
+//def componentManager = ComponentManager.getInstance()
+//def issue = componentManager.getIssueManager().getIssueObject("HARVEST-4806")
 
 def WufooUser = userManager.getUser('Wufoo').getName()
 def NewUser = userManager.getUser('jroethel')

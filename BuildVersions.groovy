@@ -5,6 +5,8 @@
  */
 
 
+// Not currently implemented anywhere
+
 import com.atlassian.jira.component.ComponentAccessor
 import com.atlassian.jira.ComponentManager
 import com.atlassian.jira.bc.issue.IssueService

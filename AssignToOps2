@@ -1,0 +1,41 @@
+/**
+ * Created by pdwyer on 10/5/2017.
+ * When a ticket is sent from a developer to Ops it needs to go to a certain assignee
+ * Feature Request = Tech_Support_Team_Leads_Teams
+ * Defect = Quality_assurance_team
+ */
+
+import com.atlassian.jira.component.ComponentAccessor
+import com.atlassian.jira.ComponentManager
+import com.atlassian.jira.event.type.EventDispatchOption
+
+
+def componentManager = ComponentManager.getInstance()
+def userManager = ComponentAccessor.getUserManager()
+def currentUser =   ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser() // Get the user for the update issue command
+
+// For testing
+//def issueManager = ComponentAccessor.getIssueManager()
+//def issue = issueManager.getIssueObject("HARVEST-9081")
+
+def issueType = issue.getIssueType().name // Get the type
+def Tier3 = userManager.getUserByName('Tier_III') // Get the QA Team user
+def TechSupport = userManager.getUserByName('Tech_Support_Team_Le')
+def isFeatureRequest = false
+def issueUser = issue.getAssignee() // Get the assignee (should be empty), only used for Commitee transition
+
+if(issueType=='Feature Request'){
+    isFeatureRequest=true
+} else {
+    isFeatureRequest = false
+}
+
+if(issueUser == null) {
+    if (isFeatureRequest) {
+        issue.setAssignee(TechSupport)
+    } else {
+        issue.setAssignee(Tier3)
+    }
+}
+
+ComponentAccessor.getIssueManager().updateIssue(currentUser,issue,EventDispatchOption.ISSUE_UPDATED,false)

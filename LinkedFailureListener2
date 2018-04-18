@@ -11,16 +11,21 @@ import com.atlassian.jira.issue.link.IssueLink
 import com.atlassian.mail.Email;
 import com.atlassian.mail.server.MailServerManager;
 import com.atlassian.mail.server.SMTPMailServer;
+import com.atlassian.jira.event.type.EventDispatchOption
 
 // Get all managers we are using
-linkMgr = ComponentManager.getInstance().getIssueLinkManager()
+def linkMgr = ComponentAccessor.getIssueLinkManager()
 def customFieldManager = ComponentAccessor.getCustomFieldManager()
 def componentManager = ComponentManager.getInstance()
-issueManager = componentManager.getIssueManager()
-userManager = ComponentAccessor.getUserManager()
+def issueManager = ComponentAccessor.getIssueManager()
+def userManager = ComponentAccessor.getUserManager()
 
 // Debugging stuff
-//def issue = componentManager.getIssueManager().getIssueObject("HARVEST-4224")
+//def issue = issueManager.getIssueObject("ODE-1604")
+
+
+
+
 //(linkMgr.getOutwardLinks(issue.getId())*.issueLinkType.name.contains('Report Failure')) && (issue.status != originalIssue.status)
 
 // Define the constants
@@ -34,7 +39,7 @@ def issues = []
 def user
 def testuser
 
-LinkType = "Report Failure"
+def LinkType = "Report Failure"
 
 // For each link check if it is a failure of link
 for (IssueLink link in linkMgr.getOutwardLinks(issue.id)) {
@@ -47,16 +52,17 @@ for (IssueLink link in linkMgr.getOutwardLinks(issue.id)) {
             TestedByUser = LinkedIssue.getCustomFieldValue(customFieldManager.getCustomFieldObjectByName("Tested By"))
             // Get the fixed by user
             if (FixedUser != null) { // Check if it is filled
-                user = userManager.getUser(FixedUser.getName())
+
+                user = userManager.getUserByName(FixedUser.getName())
                 email = user.getEmailAddress()
                 // The user should be the username which also should be the username of the email (I hope)
                 emails.add(email) // Add the email to the list
             }
             if (TestedByUser != null)
-                // Add the tested by user to the list
-                testuser = userManager.getUser(TestedByUser.getName())
-                email = testuser.getEmailAddress()
-                emails.add(email)
+            // Add the tested by user to the list
+                testuser = userManager.getUserByName(TestedByUser.getName())
+            email = testuser.getEmailAddress()
+            emails.add(email)
 
         }
     }
@@ -64,20 +70,21 @@ for (IssueLink link in linkMgr.getOutwardLinks(issue.id)) {
 
 def subject
 def body
-def count = 0
+int count
 
 // Loop through the email list
-for (String address in emails) {
-    subject ="The ticket " + issue.toString() + " has been marked as a failure of "+issues[count].toString() // Build the subject
-    body = "Failed ticket: https://jira.orchardsoft.com/browse/"+issues[count].toString()+"\n"
-    body = body+"Fail reported in:  https://jira.orchardsoft.com/browse/"+issue.toString()
-    sendEmail(address,subject,body) // Call the email
-    count++
+for (count=0; count<issues.size; count++) {
+    for (String address in emails) {
+        subject = "The ticket " + issue.toString() + " has been marked as a failure of " + issues[count].toString()
+        // Build the subject
+        body = "Failed ticket: https://jira.orchardsoft.com/browse/" + issues[count].toString() + "\n"
+        body = body + "Fail reported in:  https://jira.orchardsoft.com/browse/" + issue.toString()
+        sendEmail(address, subject, body) // Call the email
+    }
 }
-
 // Fuction to build the email and send it
 def sendEmail(String emailAddr, String subject, String body) {
-    SMTPMailServer mailServer = ComponentManager.getInstance().getMailServerManager().getDefaultSMTPMailServer()
+    SMTPMailServer mailServer = ComponentAccessor.getMailServerManager().getDefaultSMTPMailServer()
     if (mailServer) { // Check if the email server exists
         Email emailSend = new Email(emailAddr)
         emailSend.setSubject(subject)
@@ -85,3 +92,6 @@ def sendEmail(String emailAddr, String subject, String body) {
         mailServer.send(emailSend)
     }
 }
+
+//ComponentAccessor.getIssueManager().updateIssue(currentUser,issue,EventDispatchOption.ISSUE_UPDATED,false)
+

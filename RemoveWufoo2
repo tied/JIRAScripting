@@ -1,0 +1,31 @@
+/**
+ * Created by pdwyer on 08/11/2017.
+ * Script to modify who the reporter is because Wufoo cannot get emails. It should go to the current development assistant.
+ */
+
+
+import com.atlassian.jira.component.ComponentAccessor
+import com.atlassian.jira.ComponentManager
+import com.atlassian.jira.user.util.UserManager
+import com.atlassian.jira.event.type.EventDispatchOption
+
+def userManager = ComponentAccessor.getUserManager()
+def optionManager = ComponentAccessor.getOptionsManager()
+def currentUser =   ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser() // Get the user for the update issue command
+
+// For testing
+//def issueManager = ComponentAccessor.getIssueManager()
+//def issue = issueManager.getIssueObject("HARVEST-9081")
+
+def WufooUser = userManager.getUserByName('Wufoo').getName()
+def NewUser = userManager.getUserByName('jroethel')
+def watcherManager = ComponentAccessor.getWatcherManager()
+
+def reporter = issue.getReporter().getName()
+def WufooUser2 = userManager.getUserByName('Wufoo')
+
+if (reporter == WufooUser){
+    issue.setReporter(NewUser)
+    watcherManager.stopWatching(WufooUser2, issue)
+    ComponentAccessor.getIssueManager().updateIssue(currentUser,issue,EventDispatchOption.ISSUE_UPDATED,false)
+}

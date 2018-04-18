@@ -1,0 +1,26 @@
+import com.atlassian.jira.component.ComponentAccessor
+import com.atlassian.jira.ComponentManager
+import com.atlassian.jira.event.type.EventDispatchOption
+
+//def issueManager = ComponentAccessor.getIssueManager()
+//def issue = issueManager.getIssueObject("HARVEST-9081")
+
+def currentUser =   ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser()
+
+def userManager = ComponentAccessor.getUserManager()
+ComponentManager componentManager = ComponentManager.getInstance()
+
+def devUser = userManager.getUserByName('Testing_Team')
+
+def customField = ComponentAccessor.getCustomFieldManager().getCustomFieldObjectByName("Tested By")
+def customFieldValue = customField.getValue(issue)
+def fixedByUser = userManager.getUserByName(customFieldValue.getKey())
+
+if(fixedByUser != null) { //If we're not dealing with an Interface Engine issue, then assign to the last tester who looked at this issue.
+    issue.setAssignee(fixedByUser)
+}
+else { //Otherwise, assign to the Tester user.
+    issue.setAssignee(devUser)
+}
+
+ComponentAccessor.getIssueManager().updateIssue(currentUser,issue,EventDispatchOption.ISSUE_UPDATED,false)
